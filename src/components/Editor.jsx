@@ -1,13 +1,19 @@
 import React from 'react'
-import { User, Briefcase, Code, FolderGit2, Trash2, Plus, Globe, Mail, MapPin } from 'lucide-react'
+import { User, Briefcase, Code, FolderGit2, Trash2, Plus, Globe, Mail, MapPin, RotateCcw } from 'lucide-react'
 
-const Editor = ({ data, updateData, addItem, removeItem }) => {
+const Editor = ({ data, updateData, addItem, removeItem, resetData }) => {
   return (
     <div className="editor-side">
       <header className="editor-header">
-        <div className="logo">
-          <Code className="logo-icon" />
-          <span>DevResume</span>
+        <div className="header-top">
+          <div className="logo">
+            <Code className="logo-icon" />
+            <span>DevResume</span>
+          </div>
+          <button className="reset-btn" onClick={resetData} title="Reset to default">
+            <RotateCcw size={16} />
+            <span>Reset</span>
+          </button>
         </div>
         <p>Build your professional resume in minutes.</p>
       </header>
