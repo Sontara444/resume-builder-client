@@ -65,6 +65,12 @@ function App() {
     }))
   }
 
+  const resetData = () => {
+    if (window.confirm('Are you sure you want to reset all data? This cannot be undone.')) {
+      setResumeData(INITIAL_DATA)
+    }
+  }
+
   const removeItem = (section, id) => {
     setResumeData(prev => ({
       ...prev,
@@ -79,6 +85,7 @@ function App() {
         updateData={updateData} 
         addItem={addItem}
         removeItem={removeItem}
+        resetData={resetData}
       />
       <Preview data={resumeData} />
     </div>
