@@ -61,7 +61,8 @@ const INITIAL_DATA = {
       location: 'New York, NY'
     }
   ],
-  template: 'vibrant'
+  template: 'vibrant',
+  themeColor: '#ff9100'
 }
 
 function normalizeSkills(skills) {
@@ -91,7 +92,8 @@ function normalizeData(data) {
     projects:   data.projects.map(p => ({ ...p, description: normalizeDesc(p.description) })),
     experience: data.experience.map(e => ({ ...e, description: normalizeDesc(e.description) })),
     education:  data.education || [],
-    template:   data.template || 'vibrant'
+    template:   data.template || 'vibrant',
+    themeColor: data.themeColor || '#ff9100'
   }
 }
 
@@ -120,6 +122,7 @@ function loadFromStorage() {
 
 function App() {
   const [storageData, setStorageData] = useState(loadFromStorage)
+  const [showPreview, setShowPreview] = useState(false)
   const { resumes, activeId } = storageData
 
   const activeResume = resumes.find(r => r.id === activeId) || resumes[0]
@@ -235,7 +238,7 @@ function App() {
   }, [activeId])
 
   return (
-    <div className="app-container">
+    <div className={`app-container ${showPreview ? 'show-preview' : ''}`}>
       <Editor
         data={activeResume}
         resumes={resumes}
@@ -249,8 +252,12 @@ function App() {
         deleteResume={deleteResume}
         switchResume={switchResume}
         renameResume={renameResume}
+        onTogglePreview={() => setShowPreview(true)}
       />
-      <Preview data={activeResume} />
+      <Preview 
+        data={activeResume} 
+        onBack={() => setShowPreview(false)}
+      />
     </div>
   )
 }

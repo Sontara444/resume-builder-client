@@ -1,5 +1,6 @@
 import React from 'react'
-import { User, Briefcase, Code, FolderGit2, Trash2, Plus, RotateCcw, GraduationCap, Layout, Copy, FilePlus, ChevronDown, Pencil } from 'lucide-react'
+import { User, Briefcase, Code, FolderGit2, Trash2, Plus, RotateCcw, GraduationCap, Layout, Copy, FilePlus, ChevronDown, Pencil, Eye, Zap } from 'lucide-react'
+import ATSScore from './ATSScore'
 
 // Normalize any legacy description shape → string[]
 const toArr = v => {
@@ -9,7 +10,8 @@ const toArr = v => {
 
 const Editor = ({ 
   data, resumes, activeId, updateData, addItem, removeItem, resetData, 
-  createNewResume, duplicateResume, deleteResume, switchResume, renameResume 
+  createNewResume, duplicateResume, deleteResume, switchResume, renameResume,
+  onTogglePreview
 }) => {
   const [expanded, setExpanded] = React.useState({
     resumes: true,
@@ -62,10 +64,18 @@ const Editor = ({
             <Code className="logo-icon" size={20} />
             <span>DevResume</span>
           </div>
-          <button className="reset-btn" onClick={resetData} title="Reset to default">
-            <RotateCcw size={14} />
-            <span>Reset</span>
-          </button>
+
+          <ATSScore data={data} />
+
+          <div className="header-actions">
+            <button className="mobile-only-btn" onClick={onTogglePreview}>
+              <Eye size={14} /> Preview
+            </button>
+            <button className="reset-btn" onClick={resetData} title="Reset to default">
+              <RotateCcw size={14} />
+              <span>Reset</span>
+            </button>
+          </div>
         </div>
         <p>Build your professional resume in minutes.</p>
       </header>
@@ -117,20 +127,43 @@ const Editor = ({
             <ChevronDown size={14} className="chevron" />
           </div>
           {expanded.template && (
-            <div className="template-grid">
-              {[
-                { id: 'vibrant', label: 'Vibrant' },
-                { id: 'elegant', label: 'Elegant' },
-                { id: 'classic', label: 'Classic' }
-              ].map((t) => (
-                <button
-                  key={t.id}
-                  className={`template-btn ${data.template === t.id ? 'active' : ''}`}
-                  onClick={() => updateData('template', null, t.id)}
-                >
-                  {t.label}
-                </button>
-              ))}
+            <div className="template-options-container">
+              <div className="template-grid">
+                {[
+                  { id: 'vibrant', label: 'Vibrant' },
+                  { id: 'elegant', label: 'Elegant' },
+                  { id: 'classic', label: 'Classic' }
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    className={`template-btn ${data.template === t.id ? 'active' : ''}`}
+                    onClick={() => updateData('template', null, t.id)}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="color-palette-section">
+                <p className="sub-label">Accent Color</p>
+                <div className="color-grid">
+                  {[
+                    '#ff9100', // Original Orange
+                    '#2563eb', // Royal Blue
+                    '#059669', // Forest Green
+                    '#4b5563', // Slate
+                    '#111827', // Deep Black
+                    '#9f1239', // Burgundy
+                  ].map(color => (
+                    <button
+                      key={color}
+                      className={`color-btn ${data.themeColor === color ? 'active' : ''}`}
+                      style={{ '--color': color }}
+                      onClick={() => updateData('themeColor', null, color)}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </section>
