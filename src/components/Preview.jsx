@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
-import { Download } from 'lucide-react'
+import { Download, ChevronLeft } from 'lucide-react'
 import html2pdf from 'html2pdf.js'
 import ModernResume from '../templates/VibrantTemplate'
 import MinimalResume from '../templates/ElegantTemplate'
 import ATSResume from '../templates/ClassicTemplate'
 
-const Preview = ({ data }) => {
+const Preview = ({ data, onBack }) => {
   const [isDownloading, setIsDownloading] = useState(false)
 
   const downloadPDF = async () => {
@@ -42,9 +42,14 @@ const Preview = ({ data }) => {
   return (
     <div className="preview-side">
       <div className="preview-toolbar">
-        <div className="preview-status">
-          <div className="status-dot" />
-          Live Preview
+        <div className="toolbar-left">
+          <button className="mobile-only-btn" onClick={onBack}>
+            <ChevronLeft size={16} /> Editor
+          </button>
+          <div className="preview-status">
+            <div className="status-dot" />
+            Live Preview
+          </div>
         </div>
         <button
           className="download-btn"

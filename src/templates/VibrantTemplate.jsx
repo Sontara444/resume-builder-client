@@ -4,7 +4,7 @@ import { toArr, renderBold } from '../utils/resume-helpers'
 
 const VibrantTemplate = ({ data }) => {
   return (
-    <div className="resume-paper vibrant-template">
+    <div className="resume-paper vibrant-template" style={{ '--accent': data.themeColor }}>
       {/* ── Header ── */}
       <header className="resume-header">
         <h1>{data.personal.fullName || 'Your Name'}</h1>

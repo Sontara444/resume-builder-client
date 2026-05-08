@@ -3,7 +3,7 @@ import { toArr, renderBold } from '../utils/resume-helpers'
 
 const ClassicTemplate = ({ data }) => {
   return (
-    <div className="resume-paper classic-template">
+    <div className="resume-paper classic-template" style={{ '--accent': data.themeColor }}>
       <div className="ats-header">
         <h1>{data.personal.fullName}</h1>
         <p>
