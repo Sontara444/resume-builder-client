@@ -1,5 +1,5 @@
 import React from 'react'
-import { User, Briefcase, Code, FolderGit2, Trash2, Plus, RotateCcw } from 'lucide-react'
+import { User, Briefcase, Code, FolderGit2, Trash2, Plus, RotateCcw, GraduationCap, Layout, Copy, FilePlus, ChevronDown, Pencil } from 'lucide-react'
 
 // Normalize any legacy description shape → string[]
 const toArr = v => {
@@ -7,7 +7,23 @@ const toArr = v => {
   return arr.map(p => (typeof p === 'object' && p !== null) ? (p.text ?? '') : String(p))
 }
 
-const Editor = ({ data, updateData, addItem, removeItem, resetData }) => {
+const Editor = ({ 
+  data, resumes, activeId, updateData, addItem, removeItem, resetData, 
+  createNewResume, duplicateResume, deleteResume, switchResume, renameResume 
+}) => {
+  const [expanded, setExpanded] = React.useState({
+    resumes: true,
+    template: true,
+    personal: true,
+    summary: false,
+    skills: false,
+    projects: false,
+    experience: false,
+    education: false
+  })
+
+  const toggle = (sec) => setExpanded(prev => ({ ...prev, [sec]: !prev[sec] }))
+
   const newId = () => crypto.randomUUID()
 
   const addPoint = (section, itemIndex) => {
@@ -55,151 +71,267 @@ const Editor = ({ data, updateData, addItem, removeItem, resetData }) => {
       </header>
 
       <div className="editor-content">
+        {/* Resume Management */}
+        <section className={`editor-section ${expanded.resumes ? 'is-expanded' : ''}`}>
+          <div className="section-title clickable" onClick={() => toggle('resumes')}>
+            <FilePlus size={15} />
+            <h2>My Resumes</h2>
+            <ChevronDown size={14} className="chevron" />
+            <button className="add-btn" onClick={(e) => { e.stopPropagation(); createNewResume(); }}>
+              <Plus size={13} /> New
+            </button>
+          </div>
+          {expanded.resumes && (
+            <div className="resume-list">
+              {resumes.map(r => (
+                <div key={r.id} className={`resume-item-tab ${r.id === activeId ? 'active' : ''}`}>
+                  <div className="resume-item-main" onClick={() => switchResume(r.id)}>
+                    <span className="resume-name">{r.name || 'Untitled'}</span>
+                    <span className="resume-date">{new Date(r.lastModified).toLocaleDateString()}</span>
+                  </div>
+                  <div className="resume-item-actions">
+                    <button onClick={() => {
+                      const newName = prompt('Enter new resume name:', r.name)
+                      if (newName) renameResume(r.id, newName)
+                    }} title="Rename">
+                      <Pencil size={13} />
+                    </button>
+                    <button onClick={() => duplicateResume(r.id)} title="Duplicate">
+                      <Copy size={13} />
+                    </button>
+                    <button className="del" onClick={() => deleteResume(r.id)} title="Delete">
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Template Selection */}
+        <section className={`editor-section ${expanded.template ? 'is-expanded' : ''}`}>
+          <div className="section-title clickable" onClick={() => toggle('template')}>
+            <Layout size={15} />
+            <h2>Resume Template</h2>
+            <ChevronDown size={14} className="chevron" />
+          </div>
+          {expanded.template && (
+            <div className="template-grid">
+              {[
+                { id: 'vibrant', label: 'Vibrant' },
+                { id: 'elegant', label: 'Elegant' },
+                { id: 'classic', label: 'Classic' }
+              ].map((t) => (
+                <button
+                  key={t.id}
+                  className={`template-btn ${data.template === t.id ? 'active' : ''}`}
+                  onClick={() => updateData('template', null, t.id)}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
 
         {/* Personal Info */}
-        <section className="editor-section">
-          <div className="section-title">
+        <section className={`editor-section ${expanded.personal ? 'is-expanded' : ''}`}>
+          <div className="section-title clickable" onClick={() => toggle('personal')}>
             <User size={15} />
             <h2>Personal Info</h2>
+            <ChevronDown size={14} className="chevron" />
           </div>
-          <div className="input-grid">
-            <div className="input-group">
-              <label htmlFor="fullName">Full Name</label>
-              <input
-                id="fullName"
-                type="text"
-                value={data.personal.fullName}
-                onChange={(e) => updateData('personal', 'fullName', e.target.value)}
-                placeholder="John Doe"
-              />
+          {expanded.personal && (
+            <div className="input-grid">
+              <div className="input-group full-width">
+                <label htmlFor="resumeName">Resume Name (Private)</label>
+                <input
+                  id="resumeName"
+                  type="text"
+                  value={data.name || ''}
+                  onChange={(e) => updateData('name', null, e.target.value)}
+                  placeholder="e.g. Frontend Developer Resume"
+                />
+              </div>
+              <div className="input-group">
+                <label htmlFor="fullName">Full Name</label>
+                <input
+                  id="fullName"
+                  type="text"
+                  value={data.personal.fullName}
+                  onChange={(e) => updateData('personal', 'fullName', e.target.value)}
+                  placeholder="John Doe"
+                />
+              </div>
+              <div className="input-group">
+                <label htmlFor="title">Title</label>
+                <input
+                  id="title"
+                  type="text"
+                  value={data.personal.title}
+                  onChange={(e) => updateData('personal', 'title', e.target.value)}
+                  placeholder="Software Engineer"
+                />
+              </div>
+              <div className="input-group">
+                <label htmlFor="email">Email</label>
+                <input
+                  id="email"
+                  type="email"
+                  value={data.personal.email}
+                  onChange={(e) => updateData('personal', 'email', e.target.value)}
+                  placeholder="john@example.com"
+                />
+              </div>
+              <div className="input-group">
+                <label htmlFor="phone">Phone</label>
+                <input
+                  id="phone"
+                  type="tel"
+                  value={data.personal.phone || ''}
+                  onChange={(e) => updateData('personal', 'phone', e.target.value)}
+                  placeholder="+1 (555) 000-0000"
+                />
+              </div>
+              <div className="input-group">
+                <label htmlFor="location">Location</label>
+                <input
+                  id="location"
+                  type="text"
+                  value={data.personal.location}
+                  onChange={(e) => updateData('personal', 'location', e.target.value)}
+                  placeholder="City, Country"
+                />
+              </div>
+              <div className="input-group">
+                <label htmlFor="github">GitHub</label>
+                <input
+                  id="github"
+                  type="text"
+                  value={data.personal.github}
+                  onChange={(e) => updateData('personal', 'github', e.target.value)}
+                  placeholder="github.com/username"
+                />
+              </div>
+              <div className="input-group">
+                <label htmlFor="linkedin">LinkedIn</label>
+                <input
+                  id="linkedin"
+                  type="text"
+                  value={data.personal.linkedin}
+                  onChange={(e) => updateData('personal', 'linkedin', e.target.value)}
+                  placeholder="linkedin.com/in/username"
+                />
+              </div>
             </div>
-            <div className="input-group">
-              <label htmlFor="title">Title</label>
-              <input
-                id="title"
-                type="text"
-                value={data.personal.title}
-                onChange={(e) => updateData('personal', 'title', e.target.value)}
-                placeholder="Software Engineer"
-              />
-            </div>
-            <div className="input-group">
-              <label htmlFor="email">Email</label>
-              <input
-                id="email"
-                type="email"
-                value={data.personal.email}
-                onChange={(e) => updateData('personal', 'email', e.target.value)}
-                placeholder="john@example.com"
-              />
-            </div>
-            <div className="input-group">
-              <label htmlFor="phone">Phone</label>
-              <input
-                id="phone"
-                type="tel"
-                value={data.personal.phone || ''}
-                onChange={(e) => updateData('personal', 'phone', e.target.value)}
-                placeholder="+1 (555) 000-0000"
-              />
-            </div>
-            <div className="input-group">
-              <label htmlFor="location">Location</label>
-              <input
-                id="location"
-                type="text"
-                value={data.personal.location}
-                onChange={(e) => updateData('personal', 'location', e.target.value)}
-                placeholder="City, Country"
-              />
-            </div>
-            <div className="input-group">
-              <label htmlFor="github">GitHub</label>
-              <input
-                id="github"
-                type="text"
-                value={data.personal.github}
-                onChange={(e) => updateData('personal', 'github', e.target.value)}
-                placeholder="github.com/username"
-              />
-            </div>
-            <div className="input-group">
-              <label htmlFor="linkedin">LinkedIn</label>
-              <input
-                id="linkedin"
-                type="text"
-                value={data.personal.linkedin}
-                onChange={(e) => updateData('personal', 'linkedin', e.target.value)}
-                placeholder="linkedin.com/in/username"
-              />
-            </div>
-          </div>
+          )}
         </section>
 
         {/* Summary */}
-        <section className="editor-section">
-          <div className="section-title">
+        <section className={`editor-section ${expanded.summary ? 'is-expanded' : ''}`}>
+          <div className="section-title clickable" onClick={() => toggle('summary')}>
             <Briefcase size={15} />
             <h2>Summary</h2>
+            <ChevronDown size={14} className="chevron" />
           </div>
-          <textarea
-            id="summary"
-            rows="4"
-            value={data.summary}
-            onChange={(e) => updateData('summary', null, e.target.value)}
-            placeholder="Write a brief overview of your professional background..."
-          />
+          {expanded.summary && (
+            <textarea
+              id="summary"
+              rows="4"
+              value={data.summary}
+              onChange={(e) => updateData('summary', null, e.target.value)}
+              placeholder="Write a brief overview of your professional background..."
+            />
+          )}
         </section>
 
         {/* Tech Stack */}
-        <section className="editor-section">
-          <div className="section-title">
+        <section className={`editor-section ${expanded.skills ? 'is-expanded' : ''}`}>
+          <div className="section-title clickable" onClick={() => toggle('skills')}>
             <Code size={15} />
             <h2>Tech Stack</h2>
+            <ChevronDown size={14} className="chevron" />
+            <button
+              className="add-btn"
+              onClick={(e) => { e.stopPropagation(); addItem('skills', { id: newId(), category: '', items: [] }); }}
+            >
+              <Plus size={13} /> Add Category
+            </button>
           </div>
-          <div className="tags-input-container">
-            <input
-              type="text"
-              aria-label="Add a skill and press Enter"
-              placeholder="Type a skill and press Enter…"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && e.target.value.trim()) {
-                  updateData('skills', null, [...data.skills, e.target.value.trim()])
-                  e.target.value = ''
-                }
-              }}
-            />
-            {data.skills.length > 0 && (
-              <div className="tags-list">
-                {data.skills.map((skill, i) => (
-                  <span key={skill + i} className="skill-tag">
-                    {skill}
+          {expanded.skills && (
+            <div className="skill-categories-list">
+              {data.skills.map((cat, ci) => (
+                <div key={cat.id} className="skill-cat-item">
+                  <div className="item-card-header">
+                    <input
+                      type="text"
+                      className="item-title-input"
+                      value={cat.category}
+                      onChange={(e) => {
+                        const newSkills = [...data.skills]
+                        newSkills[ci].category = e.target.value
+                        updateData('skills', null, newSkills)
+                      }}
+                      placeholder="Category Name (e.g. Frameworks)"
+                    />
                     <button
-                      aria-label={`Remove ${skill}`}
-                      onClick={() => updateData('skills', null, data.skills.filter((_, idx) => idx !== i))}
+                      className="delete-btn"
+                      onClick={() => removeItem('skills', cat.id)}
                     >
-                      <Plus size={11} style={{ transform: 'rotate(45deg)' }} />
+                      <Trash2 size={14} />
                     </button>
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
+                  </div>
+                  <div className="tags-input-container">
+                    <input
+                      type="text"
+                      placeholder="Add skill and press Enter…"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && e.target.value.trim()) {
+                          const newSkills = [...data.skills]
+                          newSkills[ci].items = [...newSkills[ci].items, e.target.value.trim()]
+                          updateData('skills', null, newSkills)
+                          e.target.value = ''
+                        }
+                      }}
+                    />
+                    <div className="tags-list">
+                      {cat.items.map((item, ii) => (
+                        <span key={item + ii} className="skill-tag">
+                          {item}
+                          <button
+                            onClick={() => {
+                              const newSkills = [...data.skills]
+                              newSkills[ci].items = cat.items.filter((_, idx) => idx !== ii)
+                              updateData('skills', null, newSkills)
+                            }}
+                          >
+                            <Plus size={11} style={{ transform: 'rotate(45deg)' }} />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Projects */}
-        <section className="editor-section">
-          <div className="section-title">
+        <section className={`editor-section ${expanded.projects ? 'is-expanded' : ''}`}>
+          <div className="section-title clickable" onClick={() => toggle('projects')}>
             <FolderGit2 size={15} />
             <h2>Projects</h2>
+            <ChevronDown size={14} className="chevron" />
             <button
               className="add-btn"
-              onClick={() => addItem('projects', { id: newId(), title: '', description: [], tech: '', link: '' })}
+              onClick={(e) => { e.stopPropagation(); addItem('projects', { id: newId(), title: '', description: [], tech: '', link: '' }); }}
             >
               <Plus size={13} /> Add
             </button>
           </div>
-          {data.projects.map((project, index) => (
+          {expanded.projects && data.projects.map((project, index) => (
             <div key={project.id} className="item-card">
               <div className="item-card-header">
                 <input
@@ -266,18 +398,19 @@ const Editor = ({ data, updateData, addItem, removeItem, resetData }) => {
         </section>
 
         {/* Work Experience */}
-        <section className="editor-section">
-          <div className="section-title">
+        <section className={`editor-section ${expanded.experience ? 'is-expanded' : ''}`}>
+          <div className="section-title clickable" onClick={() => toggle('experience')}>
             <Briefcase size={15} />
             <h2>Work Experience</h2>
+            <ChevronDown size={14} className="chevron" />
             <button
               className="add-btn"
-              onClick={() => addItem('experience', { id: newId(), company: '', position: '', duration: '', description: [] })}
+              onClick={(e) => { e.stopPropagation(); addItem('experience', { id: newId(), company: '', position: '', duration: '', description: [] }); }}
             >
               <Plus size={13} /> Add
             </button>
           </div>
-          {data.experience.map((exp, index) => (
+          {expanded.experience && data.experience.map((exp, index) => (
             <div key={exp.id} className="item-card">
               <div className="item-card-header">
                 <input
@@ -338,6 +471,65 @@ const Editor = ({ data, updateData, addItem, removeItem, resetData }) => {
                 <button className="add-point-btn" onClick={() => addPoint('experience', index)}>
                   <Plus size={11} /> Add point
                 </button>
+              </div>
+            </div>
+          ))}
+        </section>
+
+        {/* Education */}
+        <section className={`editor-section ${expanded.education ? 'is-expanded' : ''}`}>
+          <div className="section-title clickable" onClick={() => toggle('education')}>
+            <GraduationCap size={15} />
+            <h2>Education</h2>
+            <ChevronDown size={14} className="chevron" />
+            <button
+              className="add-btn"
+              onClick={(e) => { e.stopPropagation(); addItem('education', { id: newId(), school: '', degree: '', duration: '', location: '' }); }}
+            >
+              <Plus size={13} /> Add
+            </button>
+          </div>
+          {expanded.education && data.education.map((edu, index) => (
+            <div key={edu.id} className="item-card">
+              <div className="item-card-header">
+                <input
+                  type="text"
+                  className="item-title-input"
+                  value={edu.school}
+                  onChange={(e) => updateData('education', 'school', e.target.value, index)}
+                  placeholder="University/School Name"
+                  aria-label="School name"
+                />
+                <button
+                  className="delete-btn"
+                  aria-label="Remove education"
+                  onClick={() => removeItem('education', edu.id)}
+                >
+                  <Trash2 size={15} />
+                </button>
+              </div>
+              <input
+                type="text"
+                value={edu.degree}
+                onChange={(e) => updateData('education', 'degree', e.target.value, index)}
+                placeholder="Degree/Certificate"
+                aria-label="Degree"
+              />
+              <div className="input-grid" style={{ marginTop: '0.5rem' }}>
+                <input
+                  type="text"
+                  value={edu.duration}
+                  onChange={(e) => updateData('education', 'duration', e.target.value, index)}
+                  placeholder="Duration (e.g. 2017 – 2021)"
+                  aria-label="Duration"
+                />
+                <input
+                  type="text"
+                  value={edu.location}
+                  onChange={(e) => updateData('education', 'location', e.target.value, index)}
+                  placeholder="Location"
+                  aria-label="Location"
+                />
               </div>
             </div>
           ))}
