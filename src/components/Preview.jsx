@@ -1,15 +1,9 @@
 import React, { useState } from 'react'
-import { Download, Mail, Globe, User, MapPin, Phone, ExternalLink } from 'lucide-react'
+import { Download } from 'lucide-react'
 import html2pdf from 'html2pdf.js'
-
-const toArr = v => {
-  const arr = Array.isArray(v) ? v : (v ? [v] : [])
-  return arr.map(p => (typeof p === 'object' && p !== null) ? (p.text ?? '') : String(p))
-}
-
-// Parse **word** markers into <strong> spans
-const renderBold = (text) =>
-  text.split(/\*\*/).map((part, i) => i % 2 === 1 ? <strong key={i}>{part}</strong> : part)
+import ModernResume from '../templates/VibrantTemplate'
+import MinimalResume from '../templates/ElegantTemplate'
+import ATSResume from '../templates/ClassicTemplate'
 
 const Preview = ({ data }) => {
   const [isDownloading, setIsDownloading] = useState(false)
@@ -36,6 +30,15 @@ const Preview = ({ data }) => {
     }
   }
 
+  const renderTemplate = () => {
+    switch (data.template) {
+      case 'elegant': return <MinimalResume data={data} />
+      case 'classic': return <ATSResume data={data} />
+      case 'vibrant': 
+      default:        return <ModernResume data={data} />
+    }
+  }
+
   return (
     <div className="preview-side">
       <div className="preview-toolbar">
@@ -55,106 +58,8 @@ const Preview = ({ data }) => {
       </div>
 
       <div className="resume-paper-container">
-        <div id="resume-content" className="resume-paper">
-
-          {/* ── Header ── */}
-          <header className="resume-header">
-            <h1>{data.personal.fullName || 'Your Name'}</h1>
-            <p className="resume-title">{data.personal.title || 'Professional Title'}</p>
-            <div className="resume-contact">
-              {data.personal.email && (
-                <span><Mail size={11} /> {data.personal.email}</span>
-              )}
-              {data.personal.phone && (
-                <span><Phone size={11} /> {data.personal.phone}</span>
-              )}
-              {data.personal.location && (
-                <span><MapPin size={11} /> {data.personal.location}</span>
-              )}
-              {data.personal.github && (
-                <span><Globe size={11} /> {data.personal.github}</span>
-              )}
-              {data.personal.linkedin && (
-                <span><User size={11} /> {data.personal.linkedin}</span>
-              )}
-            </div>
-          </header>
-
-          {/* ── Summary ── */}
-          {data.summary && (
-            <section className="resume-section">
-              <h2 className="section-heading">About</h2>
-              <p className="summary-text">{data.summary}</p>
-            </section>
-          )}
-
-          {/* ── Skills ── */}
-          {data.skills.length > 0 && (
-            <section className="resume-section">
-              <h2 className="section-heading">Technical Skills</h2>
-              <div className="skills-grid">
-                {data.skills.map((skill, i) => (
-                  <span key={skill + i} className="skill-item">{skill}</span>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* ── Projects ── */}
-          {data.projects.length > 0 && (
-            <section className="resume-section">
-              <h2 className="section-heading">Projects</h2>
-              <div className="projects-list">
-                {data.projects.map((project) => (
-                  <div key={project.id} className="project-item">
-                    <div className="project-header">
-                      <h3>{project.title || 'Untitled Project'}</h3>
-                      {project.link && (
-                        <span className="project-link">
-                          <ExternalLink size={9} />
-                          {project.link.replace(/^https?:\/\//, '')}
-                        </span>
-                      )}
-                    </div>
-                    {project.tech && <p className="project-tech">{project.tech}</p>}
-                    {toArr(project.description).length > 0 && (
-                      <ul className="desc-list">
-                        {toArr(project.description).filter(p => p.trim()).map((p, i) => (
-                          <li key={i}>{renderBold(p)}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* ── Experience ── */}
-          {data.experience.length > 0 && (
-            <section className="resume-section">
-              <h2 className="section-heading">Work Experience</h2>
-              <div className="experience-list">
-                {data.experience.map((exp) => (
-                  <div key={exp.id} className="experience-item">
-                    <div className="exp-header">
-                      <h3>{exp.company}</h3>
-                      {exp.duration && <span className="exp-duration">{exp.duration}</span>}
-                    </div>
-                    {exp.position && <p className="exp-position">{exp.position}</p>}
-                    {toArr(exp.description).length > 0 && (
-                      <ul className="desc-list">
-                        {toArr(exp.description).filter(p => p.trim()).map((p, i) => (
-                          <li key={i}>{renderBold(p)}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
+        <div id="resume-content">
+          {renderTemplate()}
         </div>
       </div>
     </div>
