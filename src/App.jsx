@@ -254,9 +254,11 @@ function App() {
         renameResume={renameResume}
         onTogglePreview={() => setShowPreview(true)}
       />
-      <Preview 
-        data={activeResume} 
+      <Preview
+        data={activeResume}
         onBack={() => setShowPreview(false)}
+        onTemplateChange={(tpl) => updateData('template', null, tpl)}
+        onColorChange={(color) => updateData('themeColor', null, color)}
       />
     </div>
   )
