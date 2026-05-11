@@ -1,6 +1,5 @@
 import React from 'react'
-import { User, Briefcase, Code, FolderGit2, Trash2, Plus, RotateCcw, GraduationCap, Layout, Copy, FilePlus, ChevronDown, Pencil, Eye, Zap } from 'lucide-react'
-import ATSScore from './ATSScore'
+import { User, Briefcase, Code, FolderGit2, Trash2, Plus, RotateCcw, GraduationCap, Copy, FilePlus, ChevronDown, Pencil, Eye } from 'lucide-react'
 
 // Normalize any legacy description shape → string[]
 const toArr = v => {
@@ -15,7 +14,6 @@ const Editor = ({
 }) => {
   const [expanded, setExpanded] = React.useState({
     resumes: true,
-    template: true,
     personal: true,
     summary: false,
     skills: false,
@@ -65,8 +63,6 @@ const Editor = ({
             <span>DevResume</span>
           </div>
 
-          <ATSScore data={data} />
-
           <div className="header-actions">
             <button className="mobile-only-btn" onClick={onTogglePreview}>
               <Eye size={14} /> Preview
@@ -115,55 +111,6 @@ const Editor = ({
                   </div>
                 </div>
               ))}
-            </div>
-          )}
-        </section>
-
-        {/* Template Selection */}
-        <section className={`editor-section ${expanded.template ? 'is-expanded' : ''}`}>
-          <div className="section-title clickable" onClick={() => toggle('template')}>
-            <Layout size={15} />
-            <h2>Resume Template</h2>
-            <ChevronDown size={14} className="chevron" />
-          </div>
-          {expanded.template && (
-            <div className="template-options-container">
-              <div className="template-grid">
-                {[
-                  { id: 'vibrant', label: 'Vibrant' },
-                  { id: 'elegant', label: 'Elegant' },
-                  { id: 'classic', label: 'Classic' }
-                ].map((t) => (
-                  <button
-                    key={t.id}
-                    className={`template-btn ${data.template === t.id ? 'active' : ''}`}
-                    onClick={() => updateData('template', null, t.id)}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="color-palette-section">
-                <p className="sub-label">Accent Color</p>
-                <div className="color-grid">
-                  {[
-                    '#ff9100', // Original Orange
-                    '#2563eb', // Royal Blue
-                    '#059669', // Forest Green
-                    '#4b5563', // Slate
-                    '#111827', // Deep Black
-                    '#9f1239', // Burgundy
-                  ].map(color => (
-                    <button
-                      key={color}
-                      className={`color-btn ${data.themeColor === color ? 'active' : ''}`}
-                      style={{ '--color': color }}
-                      onClick={() => updateData('themeColor', null, color)}
-                    />
-                  ))}
-                </div>
-              </div>
             </div>
           )}
         </section>
