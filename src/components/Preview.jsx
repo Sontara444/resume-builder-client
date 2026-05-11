@@ -254,46 +254,62 @@ const COLORS = [
   { hex: '#111827', name: 'Charcoal' },
 ]
 
-// Renders dashed page-break rulers on top of the resume (preview only, not in PDF)
-const PageBreaks = ({ contentRef }) => {
-  const [pageCount, setPageCount] = useState(1)
-
-  useEffect(() => {
-    const el = contentRef.current
-    if (!el) return
-    const observer = new ResizeObserver(() => {
-      // 297mm at 96dpi ≈ 1122.52px, but use getBoundingClientRect for actual rendered px
-      const A4_PX = 297 * (96 / 25.4) // ~1122.52 px
-      const pages = Math.ceil(el.getBoundingClientRect().height / A4_PX)
-      setPageCount(Math.max(1, pages))
-    })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [contentRef])
-
-  if (pageCount <= 1) return null
-
-  const A4_MM = 297
-  return (
-    <>
-      {Array.from({ length: pageCount - 1 }, (_, i) => (
-        <div
-          key={i}
-          className="page-break-ruler"
-          style={{ top: `${(i + 1) * A4_MM}mm` }}
-        >
-          <span className="page-break-label">Page {i + 2}</span>
-        </div>
-      ))}
-    </>
-  )
-}
-
 const Preview = ({ data, onBack, onTemplateChange, onColorChange }) => {
   const [isDownloading, setIsDownloading] = useState(false)
   const [downloadMenuOpen, setDownloadMenuOpen] = useState(false)
-  const contentRef = useRef(null)
+  // pageBreaks: array of {start, height} in px for each page segment
+  const [pageSegments, setPageSegments] = useState([{ start: 0, height: null }])
+  const hiddenRef = useRef(null)
   const downloadMenuRef = useRef(null)
+
+  useEffect(() => {
+    const container = hiddenRef.current
+    if (!container) return
+
+    const compute = () => {
+      const A4_PX = 297 * (96 / 25.4)
+      const containerRect = container.getBoundingClientRect()
+      const totalHeight = containerRect.height
+      const total = Math.max(1, Math.ceil(totalHeight / A4_PX))
+
+      if (total <= 1) {
+        setPageSegments([{ start: 0, height: null }])
+        return
+      }
+
+      // Leaf text elements are the natural break candidates
+      const els = Array.from(container.querySelectorAll('h1, h2, h3, p, li'))
+
+      // Compute where each page STARTS (in template px from container top)
+      const starts = [0]
+      for (let page = 1; page < total; page++) {
+        const boundary = page * A4_PX
+        let best = boundary
+        let maxBottom = 0
+
+        for (const el of els) {
+          const bottom = el.getBoundingClientRect().bottom - containerRect.top
+          if (bottom <= boundary && bottom > maxBottom) maxBottom = bottom
+        }
+
+        // Use the natural break if it's in the last 40% of the page
+        if (maxBottom >= boundary - A4_PX * 0.4) best = maxBottom
+        starts.push(best)
+      }
+
+      // Each segment: start px offset + height (content that belongs to this page)
+      const segs = starts.map((start, i) => ({
+        start,
+        height: i < starts.length - 1 ? starts[i + 1] - start : totalHeight - start
+      }))
+      setPageSegments(segs)
+    }
+
+    const observer = new ResizeObserver(compute)
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [])
+
   const accentColor = data.themeColor || '#ff9100'
 
   useEffect(() => {
@@ -427,11 +443,30 @@ const Preview = ({ data, onBack, onTemplateChange, onColorChange }) => {
 
       <div className="preview-workspace">
         <div className="resume-paper-container">
-          <div className="paper-wrapper">
-            <div id="resume-content" ref={contentRef}>
-              {renderTemplate()}
-            </div>
-            <PageBreaks contentRef={contentRef} />
+          {/* Hidden source — used only for PDF/PNG export and page-count measurement */}
+          <div id="resume-content" ref={hiddenRef} className="resume-pdf-source">
+            {renderTemplate()}
+          </div>
+          {/* Paged display — each page is a clipped A4 sheet */}
+          <div className="paged-display">
+            {pageSegments.map((seg, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && (
+                  <div className="page-gap">
+                    <span className="page-gap-label">Page {i + 1}</span>
+                  </div>
+                )}
+                {/* Outer clip: always 297mm tall, white bg — looks like a full A4 sheet */}
+                <div className="page-clip">
+                  {/* Inner clip: cuts content to exactly this page's segment height */}
+                  <div style={{ height: `${seg.height}px`, overflow: 'hidden' }}>
+                    <div style={{ transform: `translateY(-${seg.start}px)` }}>
+                      {renderTemplate()}
+                    </div>
+                  </div>
+                </div>
+              </React.Fragment>
+            ))}
           </div>
         </div>
 

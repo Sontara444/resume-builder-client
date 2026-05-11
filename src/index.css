@@ -635,41 +635,50 @@ textarea { resize: vertical; line-height: 1.5; }
   display: flex;
   justify-content: center;
   align-items: flex-start;
-}
-
-.paper-wrapper {
   position: relative;
-  display: inline-block;
-  line-height: 0;
 }
 
-.paper-wrapper > #resume-content {
-  line-height: initial;
+/* Hidden source rendered off-screen — for PDF/PNG export and height measurement */
+.resume-pdf-source {
+  position: fixed;
+  left: -999vw;
+  top: 0;
+  width: 210mm;
+  pointer-events: none;
+  z-index: -1;
 }
 
-/* ─── Page-break separator ───────────────
-   Shown in preview only — sits outside #resume-content so html2pdf never
-   captures it. Extends beyond the paper edges to fill the container gutter. */
-.page-break-ruler {
-  position: absolute;
-  /* match resume-paper-container padding so the gap fills edge-to-edge */
-  left: -2.5rem;
-  right: -2.5rem;
-  height: 56px;
-  transform: translateY(-50%);
-  background: var(--bg-base, #0d0d0f);
+/* ─── Paged display ──────────────────── */
+.paged-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+/* Each A4 page — clips the template to a 297mm window */
+.page-clip {
+  width: 210mm;
+  height: 297mm;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15), 0 12px 40px rgba(0,0,0,0.35);
+}
+
+/* Suppress any box-shadow from the template inside the clip */
+.page-clip .resume-paper {
+  box-shadow: none;
+}
+
+/* Gap shown between pages */
+.page-gap {
+  height: 2.5rem;
+  width: 210mm;
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
-  z-index: 20;
-  /* simulate paper-edge shadows above and below the gap */
-  box-shadow:
-    inset 0  6px 8px -4px rgba(0,0,0,0.55),
-    inset 0 -6px 8px -4px rgba(0,0,0,0.55);
 }
 
-.page-break-label {
+.page-gap-label {
   font-size: 0.58rem;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -681,7 +690,6 @@ textarea { resize: vertical; line-height: 1.5; }
   padding: 0.45rem 0.85rem;
   border-radius: 99px;
   white-space: nowrap;
-  pointer-events: none;
   user-select: none;
 }
 
@@ -1160,7 +1168,6 @@ textarea { resize: vertical; line-height: 1.5; }
   padding: 2.75rem 3rem;
   color: var(--r-text);
   font-family: var(--font);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15), 0 12px 40px rgba(0,0,0,0.35);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -1601,7 +1608,7 @@ textarea { resize: vertical; line-height: 1.5; }
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  box-shadow: none;
 }
 
 .minimal-header {
@@ -1742,7 +1749,7 @@ textarea { resize: vertical; line-height: 1.5; }
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  box-shadow: none;
 }
 
 .ats-header {
@@ -2050,9 +2057,10 @@ textarea { resize: vertical; line-height: 1.5; }
   .preview-side { height: auto; display: block; overflow: visible; }
   .preview-workspace { display: block; }
   .resume-paper-container { padding: 0; overflow: visible; }
-  .resume-paper, .minimal-template, .ats-template,
-  .compact-template, .sidebar-template, .bold-template,
-  .executive-template, .creative-template, .timeline-template { box-shadow: none; width: 100%; margin: 0; }
+  /* Show the hidden source for printing, hide the paged display */
+  .resume-pdf-source { position: static !important; left: auto !important; visibility: visible !important; }
+  .paged-display { display: none; }
+  .resume-paper { box-shadow: none; width: 100%; margin: 0; }
 }
 
 /* ════════════════════════════════════════
@@ -2068,7 +2076,7 @@ textarea { resize: vertical; line-height: 1.5; }
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  box-shadow: none;
 }
 
 .compact-header {
@@ -2189,7 +2197,7 @@ textarea { resize: vertical; line-height: 1.5; }
   grid-template-columns: 32% 1fr;
   font-family: 'Inter', sans-serif;
   color: #1f2937;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  box-shadow: none;
   padding: 0;
   gap: 0;
 }
@@ -2407,7 +2415,7 @@ textarea { resize: vertical; line-height: 1.5; }
   font-family: 'Inter', sans-serif;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  box-shadow: none;
 }
 
 .bold-header {
@@ -2591,7 +2599,7 @@ textarea { resize: vertical; line-height: 1.5; }
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  box-shadow: none;
 }
 
 .exec-header {
@@ -2774,7 +2782,7 @@ textarea { resize: vertical; line-height: 1.5; }
   font-family: 'Inter', sans-serif;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  box-shadow: none;
 }
 
 .creative-header {
@@ -3061,7 +3069,7 @@ textarea { resize: vertical; line-height: 1.5; }
   font-family: 'Inter', sans-serif;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  box-shadow: none;
 }
 
 /* ── Header ── */
