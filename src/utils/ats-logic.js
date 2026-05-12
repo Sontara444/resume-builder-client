@@ -4,6 +4,21 @@ export const ACTION_VERBS = [
   'reduced', 'increased', 'streamlined', 'automated'
 ]
 
+export const checkKeywordMatch = (data, keywordsString) => {
+  if (!keywordsString) return { found: [], missing: [], percentage: 0 }
+  
+  const keywords = keywordsString.split(',').map(k => k.trim().toLowerCase()).filter(k => k.length > 0)
+  if (keywords.length === 0) return { found: [], missing: [], percentage: 0 }
+
+  const { targetKeywords, ...rest } = data
+  const allText = JSON.stringify(rest).toLowerCase()
+  const found = keywords.filter(k => allText.includes(k))
+  const missing = keywords.filter(k => !allText.includes(k))
+  const percentage = Math.round((found.length / keywords.length) * 100)
+
+  return { found, missing, percentage }
+}
+
 export const calculateATSScore = (data) => {
   let score = 0
   const suggestions = []
@@ -54,7 +69,8 @@ export const calculateATSScore = (data) => {
   }
 
   // Rule 5: Action Verbs
-  const allText = JSON.stringify(data).toLowerCase()
+  const { targetKeywords: _, ...contentWithoutKeywords } = data
+  const allText = JSON.stringify(contentWithoutKeywords).toLowerCase()
   const foundVerbs = ACTION_VERBS.filter(verb => allText.includes(verb))
   if (foundVerbs.length >= 5) {
     score += 15
@@ -73,6 +89,20 @@ export const calculateATSScore = (data) => {
     strengths.push('Complete contact information.')
   } else {
     suggestions.push('Ensure Email, Phone, and LinkedIn/GitHub are provided.')
+  }
+
+  // Rule 7: Keyword Match (Bonus)
+  if (data.targetKeywords) {
+    const { percentage } = checkKeywordMatch(data, data.targetKeywords)
+    if (percentage >= 80) {
+      score += 10
+      strengths.push('Excellent keyword alignment with target job.')
+    } else if (percentage >= 50) {
+      score += 5
+      strengths.push('Good keyword alignment.')
+    } else if (percentage > 0) {
+      suggestions.push('Try to include more keywords from the job description.')
+    }
   }
 
   return {

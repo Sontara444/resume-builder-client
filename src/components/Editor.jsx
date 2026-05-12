@@ -63,6 +63,8 @@ const Editor = ({
             <span>DevResume</span>
           </div>
 
+          <ATSScore data={data} updateData={updateData} />
+
           <div className="header-actions">
             <button className="mobile-only-btn" onClick={onTogglePreview}>
               <Eye size={14} /> Preview
@@ -90,22 +92,22 @@ const Editor = ({
           {expanded.resumes && (
             <div className="resume-list">
               {resumes.map(r => (
-                <div key={r.id} className={`resume-item-tab ${r.id === activeId ? 'active' : ''}`}>
-                  <div className="resume-item-main" onClick={() => switchResume(r.id)}>
+                <div key={r._id} className={`resume-item-tab ${r._id === activeId ? 'active' : ''}`}>
+                  <div className="resume-item-main" onClick={() => switchResume(r._id)}>
                     <span className="resume-name">{r.name || 'Untitled'}</span>
                     <span className="resume-date">{new Date(r.lastModified).toLocaleDateString()}</span>
                   </div>
                   <div className="resume-item-actions">
                     <button onClick={() => {
                       const newName = prompt('Enter new resume name:', r.name)
-                      if (newName) renameResume(r.id, newName)
+                      if (newName) renameResume(r._id, newName)
                     }} title="Rename">
                       <Pencil size={13} />
                     </button>
-                    <button onClick={() => duplicateResume(r.id)} title="Duplicate">
+                    <button onClick={() => duplicateResume(r._id)} title="Duplicate">
                       <Copy size={13} />
                     </button>
-                    <button className="del" onClick={() => deleteResume(r.id)} title="Delete">
+                    <button className="del" onClick={() => deleteResume(r._id)} title="Delete">
                       <Trash2 size={13} />
                     </button>
                   </div>
