@@ -48,7 +48,8 @@ const INITIAL_DATA = {
     }
   ],
   template: 'vibrant',
-  themeColor: '#ff9100'
+  themeColor: '#ff9100',
+  targetKeywords: ''
 }
 
 function normalizeSkills(skills) {
@@ -77,7 +78,8 @@ function normalizeData(data) {
     experience: data.experience.map(e => ({ ...e, description: normalizeDesc(e.description) })),
     education:  data.education || [],
     template:   data.template || 'vibrant',
-    themeColor: data.themeColor || '#ff9100'
+    themeColor: data.themeColor || '#ff9100',
+    targetKeywords: data.targetKeywords || ''
   }
 }
 

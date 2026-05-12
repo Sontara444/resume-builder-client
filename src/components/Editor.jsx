@@ -65,7 +65,7 @@ const Editor = ({
             <span>DevResume</span>
           </div>
 
-          <ATSScore data={data} />
+          <ATSScore data={data} updateData={updateData} />
 
           <div className="header-actions">
             <button className="mobile-only-btn" onClick={onTogglePreview}>
