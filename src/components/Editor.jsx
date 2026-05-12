@@ -1,10 +1,37 @@
 import React from 'react'
 import { User, Briefcase, Code, FolderGit2, Trash2, Plus, RotateCcw, GraduationCap, Copy, FilePlus, ChevronDown, Pencil, Eye } from 'lucide-react'
+import ATSScore from './ATSScore'
 
 // Normalize any legacy description shape → string[]
 const toArr = v => {
   const arr = Array.isArray(v) ? v : (v ? [v] : [])
   return arr.map(p => (typeof p === 'object' && p !== null) ? (p.text ?? '') : String(p))
+}
+
+const AutoResizeTextarea = ({ value, onChange, placeholder, className, onKeyDown, onMouseDown, id }) => {
+  const textareaRef = React.useRef(null)
+
+  React.useLayoutEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
+    }
+  }, [value])
+
+  return (
+    <textarea
+      id={id}
+      ref={textareaRef}
+      value={value}
+      onChange={onChange}
+      onKeyDown={onKeyDown}
+      onMouseDown={onMouseDown}
+      placeholder={placeholder}
+      className={className}
+      rows="1"
+      style={{ overflow: 'hidden', resize: 'none' }}
+    />
+  )
 }
 
 const Editor = ({ 
@@ -63,7 +90,6 @@ const Editor = ({
             <span>DevResume</span>
           </div>
 
-          <ATSScore data={data} updateData={updateData} />
 
           <div className="header-actions">
             <button className="mobile-only-btn" onClick={onTogglePreview}>
@@ -218,9 +244,8 @@ const Editor = ({
             <ChevronDown size={14} className="chevron" />
           </div>
           {expanded.summary && (
-            <textarea
+            <AutoResizeTextarea
               id="summary"
-              rows="4"
               value={data.summary}
               onChange={(e) => updateData('summary', null, e.target.value)}
               placeholder="Write a brief overview of your professional background..."
@@ -336,12 +361,10 @@ const Editor = ({
                 {toArr(project.description).map((point, pi) => (
                   <div key={pi} className="point-row">
                     <span className="point-bullet" />
-                    <input
-                      type="text"
+                    <AutoResizeTextarea
                       value={point}
                       onChange={(e) => updatePoint('projects', index, pi, e.target.value)}
                       placeholder="Describe a feature… (select words + B to bold)"
-                      aria-label={`Project point ${pi + 1}`}
                     />
                     <button
                       className="point-bold"
@@ -429,12 +452,10 @@ const Editor = ({
                 {toArr(exp.description).map((point, pi) => (
                   <div key={pi} className="point-row">
                     <span className="point-bullet" />
-                    <input
-                      type="text"
+                    <AutoResizeTextarea
                       value={point}
                       onChange={(e) => updatePoint('experience', index, pi, e.target.value)}
                       placeholder="Describe a responsibility… (select words + B to bold)"
-                      aria-label={`Experience point ${pi + 1}`}
                     />
                     <button
                       className="point-bold"

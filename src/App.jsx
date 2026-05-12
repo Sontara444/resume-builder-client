@@ -249,10 +249,8 @@ function App() {
       />
       <Preview 
         data={data} 
+        updateData={updateData}
         onBack={() => setShowPreview(false)} 
-      <Preview
-        data={activeResume}
-        onBack={() => setShowPreview(false)}
         onTemplateChange={(tpl) => updateData('template', null, tpl)}
         onColorChange={(color) => updateData('themeColor', null, color)}
       />

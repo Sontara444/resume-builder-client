@@ -254,7 +254,7 @@ const COLORS = [
   { hex: '#111827', name: 'Charcoal' },
 ]
 
-const Preview = ({ data, onBack, onTemplateChange, onColorChange }) => {
+const Preview = ({ data, updateData, onBack, onTemplateChange, onColorChange }) => {
   const [isDownloading, setIsDownloading] = useState(false)
   const [downloadMenuOpen, setDownloadMenuOpen] = useState(false)
   // pageBreaks: array of {start, height} in px for each page segment
@@ -399,7 +399,7 @@ const Preview = ({ data, onBack, onTemplateChange, onColorChange }) => {
           </div>
         </div>
         <div className="toolbar-right">
-          <ATSScore data={data} />
+          <ATSScore data={data} updateData={updateData} />
           <div className="download-menu-wrap" ref={downloadMenuRef}>
             <button
               className="download-btn"
