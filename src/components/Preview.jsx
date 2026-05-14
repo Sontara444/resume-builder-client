@@ -270,34 +270,56 @@ const Preview = ({ data, updateData, onBack, onTemplateChange, onColorChange }) 
       const A4_PX = 297 * (96 / 25.4)
       const containerRect = container.getBoundingClientRect()
       const totalHeight = containerRect.height
-      const total = Math.max(1, Math.ceil(totalHeight / A4_PX))
-
-      if (total <= 1) {
-        setPageSegments([{ start: 0, height: null }])
+      
+      if (totalHeight <= A4_PX) {
+        setPageSegments([{ start: 0, height: totalHeight }])
         return
       }
 
-      // Leaf text elements are the natural break candidates
-      const els = Array.from(container.querySelectorAll('h1, h2, h3, p, li'))
-
-      // Compute where each page STARTS (in template px from container top)
+      // Candidates for break points: headings, paragraphs, list items, AND section blocks
+      const els = Array.from(container.querySelectorAll('h1, h2, h3, p, li, .experience-item, .project-item, .education-item, .skill-cat-row'))
+      
       const starts = [0]
-      for (let page = 1; page < total; page++) {
-        const boundary = page * A4_PX
-        let best = boundary
-        let maxBottom = 0
+      let currentTotalHeight = 0
+
+      // We determine where each page ends (and the next starts)
+      // A page should ideally end at the bottom of some element, before the boundary.
+      while (currentTotalHeight + A4_PX < totalHeight) {
+        const boundary = starts[starts.length - 1] + A4_PX
+        let bestBreak = boundary - 10 // Default break if no better one found (with 10px padding)
+        let maxSafeBottom = 0
 
         for (const el of els) {
-          const bottom = el.getBoundingClientRect().bottom - containerRect.top
-          if (bottom <= boundary && bottom > maxBottom) maxBottom = bottom
+          const rect = el.getBoundingClientRect()
+          const top = rect.top - containerRect.top
+          const bottom = rect.bottom - containerRect.top
+
+          // If the element is entirely within the current page
+          if (bottom <= boundary - 15) { // 15px safe margin at bottom
+            if (bottom > maxSafeBottom) maxSafeBottom = bottom
+          } 
+          // If the element crosses the boundary, we'd prefer to break BEFORE it
+          else if (top < boundary - 15 && bottom > boundary - 15) {
+            // Only break before if the top is reasonably close to the boundary
+            // (avoids leaving huge empty spaces if one element is massive)
+            if (top > starts[starts.length - 1] + A4_PX * 0.2) {
+              // We'll use maxSafeBottom if found, otherwise we force break at boundary
+            }
+          }
         }
 
-        // Use the natural break if it's in the last 40% of the page
-        if (maxBottom >= boundary - A4_PX * 0.4) best = maxBottom
-        starts.push(best)
+        // If we found a natural break point (bottom of an element)
+        if (maxSafeBottom > starts[starts.length - 1] + A4_PX * 0.5) {
+          bestBreak = maxSafeBottom
+        } else {
+          // If no good break found, just use the boundary minus a small padding to avoid clipping
+          bestBreak = boundary - 15
+        }
+
+        starts.push(bestBreak)
+        currentTotalHeight = bestBreak
       }
 
-      // Each segment: start px offset + height (content that belongs to this page)
       const segs = starts.map((start, i) => ({
         start,
         height: i < starts.length - 1 ? starts[i + 1] - start : totalHeight - start

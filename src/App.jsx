@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import axios from 'axios'
 import Editor from './components/Editor'
 import Preview from './components/Preview'
+import Home from './components/Home'
 
-const API_BASE = 'http://localhost:5000/api/resumes'
+const API_BASE = 'http://127.0.0.1:5000/api/resumes'
 
 const INITIAL_DATA = {
   personal: {
@@ -72,24 +74,24 @@ function normalizeDesc(v) {
 function normalizeData(data) {
   return {
     ...data,
-    summary:    data.summary || '',
-    skills:     normalizeSkills(data.skills),
-    projects:   data.projects.map(p => ({ ...p, description: normalizeDesc(p.description) })),
+    summary: data.summary || '',
+    skills: normalizeSkills(data.skills),
+    projects: data.projects.map(p => ({ ...p, description: normalizeDesc(p.description) })),
     experience: data.experience.map(e => ({ ...e, description: normalizeDesc(e.description) })),
-    education:  data.education || [],
-    template:   data.template || 'vibrant',
+    education: data.education || [],
+    template: data.template || 'vibrant',
     themeColor: data.themeColor || '#ff9100',
     targetKeywords: data.targetKeywords || ''
   }
 }
 
-function App() {
+function EditorPage() {
   const [storageData, setStorageData] = useState({ resumes: [], activeId: null })
   const [showPreview, setShowPreview] = useState(false)
   const [loading, setLoading] = useState(true)
 
   const activeResume = storageData.resumes.find(r => r._id === storageData.activeId) || storageData.resumes[0]
-  const data = activeResume ? normalizeData(activeResume) : null
+  const data = useMemo(() => activeResume ? normalizeData(activeResume) : null, [activeResume])
 
   // 1. Fetch data from DB
   useEffect(() => {
@@ -161,7 +163,7 @@ function App() {
   const addItem = useCallback((section, item) => {
     setStorageData(prev => ({
       ...prev,
-      resumes: prev.resumes.map(r => 
+      resumes: prev.resumes.map(r =>
         r._id === prev.activeId ? { ...r, [section]: [...r[section], item] } : r
       )
     }))
@@ -170,7 +172,7 @@ function App() {
   const removeItem = useCallback((section, id) => {
     setStorageData(prev => ({
       ...prev,
-      resumes: prev.resumes.map(r => 
+      resumes: prev.resumes.map(r =>
         r._id === prev.activeId ? { ...r, [section]: r[section].filter(item => item.id !== id) } : r
       )
     }))
@@ -232,11 +234,11 @@ function App() {
 
   return (
     <div className={`app-container ${showPreview ? 'show-preview' : ''}`}>
-      <Editor 
-        data={data} 
+      <Editor
+        data={data}
         resumes={storageData.resumes}
         activeId={storageData.activeId}
-        updateData={updateData} 
+        updateData={updateData}
         updatePoint={updatePoint}
         addItem={addItem}
         removeItem={removeItem}
@@ -247,10 +249,10 @@ function App() {
         renameResume={renameResume}
         onTogglePreview={() => setShowPreview(true)}
       />
-      <Preview 
-        data={data} 
+      <Preview
+        data={data}
         updateData={updateData}
-        onBack={() => setShowPreview(false)} 
+        onBack={() => setShowPreview(false)}
         onTemplateChange={(tpl) => updateData('template', null, tpl)}
         onColorChange={(color) => updateData('themeColor', null, color)}
       />
@@ -258,4 +260,19 @@ function App() {
   )
 }
 
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/create" element={<EditorPage />} />
+      </Routes>
+    </BrowserRouter>
+  )
+}
+
 export default App
+
+
+
+
