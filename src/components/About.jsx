@@ -1,12 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Target, Shield, Zap, Sparkles, Code, Globe, ArrowRight } from 'lucide-react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import './About.css';
 
 const About = () => {
-  // Optional: Add a simple scroll effect or leave it pure CSS
+  const observerRef = useRef(null);
+
   useEffect(() => {
+    // Spotlight effect
     const handleMouseMove = (e) => {
       const cards = document.querySelectorAll('.about-card');
       cards.forEach(card => {
@@ -19,8 +21,22 @@ const About = () => {
     };
     
     document.getElementById('about-features')?.addEventListener('mousemove', handleMouseMove);
+    
+    // Intersection Observer for scroll animations
+    observerRef.current = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    const revealElements = document.querySelectorAll('.reveal-on-scroll');
+    revealElements.forEach(el => observerRef.current.observe(el));
+
     return () => {
       document.getElementById('about-features')?.removeEventListener('mousemove', handleMouseMove);
+      if (observerRef.current) observerRef.current.disconnect();
     }
   }, []);
 
@@ -89,7 +105,7 @@ const About = () => {
         </section>
 
         {/* MISSION STATEMENT */}
-        <section className="mission-section">
+        <section className="mission-section reveal-on-scroll">
           <div className="mission-container">
             <div className="quote-mark">"</div>
             <h2 className="mission-text">
@@ -100,7 +116,7 @@ const About = () => {
         </section>
 
         {/* CORE VALUES */}
-        <section className="about-features" id="about-features">
+        <section className="about-features reveal-on-scroll delay-1" id="about-features">
           <div className="section-header center">
             <h2 className="section-title">Driven by Excellence</h2>
             <p className="section-subtitle">The core principles that shape every feature we build</p>
@@ -149,8 +165,42 @@ const About = () => {
           </div>
         </section>
 
+        {/* MEET THE TEAM */}
+        <section className="team-section reveal-on-scroll delay-2">
+          <div className="section-header center">
+            <h2 className="section-title">Meet the Builders</h2>
+            <p className="section-subtitle">The passionate team behind ResumeCraft</p>
+          </div>
+          
+          <div className="team-grid">
+            <div className="team-member">
+              <div className="member-avatar">
+                <div className="avatar-placeholder">Alex</div>
+              </div>
+              <h3 className="member-name">Alex Developer</h3>
+              <p className="member-role">Founder & Lead Engineer</p>
+            </div>
+            
+            <div className="team-member">
+              <div className="member-avatar">
+                <div className="avatar-placeholder">Sam</div>
+              </div>
+              <h3 className="member-name">Sam Design</h3>
+              <p className="member-role">Head of Product Design</p>
+            </div>
+            
+            <div className="team-member">
+              <div className="member-avatar">
+                <div className="avatar-placeholder">Jordan</div>
+              </div>
+              <h3 className="member-name">Jordan Strategy</h3>
+              <p className="member-role">Career Strategist</p>
+            </div>
+          </div>
+        </section>
+
         {/* CTA SECTION */}
-        <section className="about-cta">
+        <section className="about-cta reveal-on-scroll delay-3">
           <div className="cta-container">
             <h2>Ready to transform your career?</h2>
             <p>Join thousands of professionals who have already upgraded their resumes.</p>
