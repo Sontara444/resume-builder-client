@@ -4,7 +4,7 @@ import axios from 'axios'
 import Editor from './components/Editor'
 import Preview from './components/Preview'
 import Home from './components/Home'
-
+import About from './components/About'
 const API_BASE = 'http://127.0.0.1:5000/api/resumes'
 
 const INITIAL_DATA = {
@@ -265,6 +265,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
         <Route path="/create" element={<EditorPage />} />
       </Routes>
     </BrowserRouter>

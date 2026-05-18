@@ -1,5 +1,6 @@
 import React from 'react';
 import { Mail, Globe, Briefcase, MessageSquare, ExternalLink, ShieldCheck, Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -37,9 +38,9 @@ const Footer = () => {
             <div className="footer-link-group">
               <h4>Product</h4>
               <ul>
-                <li><a href="/create">Resume Builder</a></li>
+                <li><Link to="/create">Resume Builder</Link></li>
                 <li><a href="/#templates">Templates</a></li>
-                <li><a href="/#features">Features</a></li>
+                <li><Link to="/about">About Us</Link></li>
                 <li><a href="#">Examples</a></li>
               </ul>
             </div>
